@@ -1024,7 +1024,7 @@ export function Sidebar(props: Props) {
             <Icon name="sidebar" size={16} />
           </button>
         )}
-        <div className="brand-wordmark text-[14px]">OpenWorker<span className="beta-tag">BETA</span></div>
+        <div className="brand-wordmark text-[14px]">MACOM<span className="beta-tag">AI</span></div>
       </div>
 
       {/* New session: a quiet nav row like its siblings (UX-040 — the filled accent block
