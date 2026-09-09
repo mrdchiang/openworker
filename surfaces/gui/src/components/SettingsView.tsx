@@ -47,6 +47,7 @@ import { MemorySection } from "./MemorySection";
 import { PersonasTab } from "./PersonasTab";
 import { SkillsTab } from "./SkillsTab";
 import { showPersonas } from "../flags";
+import { VisionIdentity } from "./VisionIdentity";
 
 // Settings, restructured (Option 2) into a full-page surface that mirrors IntegrationsView's shell:
 // a left sub-nav (Appearance · Files · Models · Personas) + centered panel, replacing the old
@@ -55,7 +56,7 @@ import { showPersonas } from "../flags";
 // Models + Personas host the existing tab components inside the page shell (field re-skin to follow).
 // "appearance" is the General tab's stable key — callers deep-link with it, so the
 // rename (UX-021) changed only the label. "files" folded into General as a card.
-type SetTab = "appearance" | "models" | "context" | "skills" | "voice" | "memory" | "personas";
+type SetTab = "appearance" | "models" | "context" | "skills" | "voice" | "memory" | "personas" | "identity";
 
 const CARD = "rounded-xl2 border border-line bg-panel";
 const FIELD_LABEL = "text-[13px] font-medium text-ink";
@@ -73,6 +74,7 @@ const SET_TABS: {
 }[] = [
   { key: "appearance", labelKey: "settings.tab.general", icon: "sliders" },
   { key: "models", labelKey: "settings.tab.models", icon: "code" },
+  { key: "identity", labelKey: "Identity · Okta", icon: "sliders" },
   { key: "context", labelKey: "settings.tab.context", icon: "refresh" },
   { key: "skills", labelKey: "settings.tab.skills", icon: "book" },
   { key: "voice", labelKey: "settings.tab.voice", icon: "mic" },
@@ -135,7 +137,7 @@ export function SettingsView({
               />
               <ModelsTab />
             </section>
-          ) : tab === "context" ? (
+          ) : tab === "identity" ? <VisionIdentity /> : tab === "context" ? (
             <section>
               <PanelHead
                 title="Context optimization"

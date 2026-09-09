@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getConnectors } from "../api";
 import { ConnectorsSection } from "./connectors/ConnectorsSection";
 import { Icon } from "./Icon";
+import { VisionCatalog } from "./VisionCatalog";
 
 // The Connectors surface (renamed from "Integrations", §26). The separate "MCP
 // servers" tab is retired (UX-034): custom MCP servers now live on the Connectors
@@ -12,6 +13,7 @@ import { Icon } from "./Icon";
 // Activity is the audit log, reached from the account menu.
 
 export function IntegrationsView() {
+  const [view, setView] = useState<"catalog" | "admin">("catalog");
   const { t: tt } = useTranslation();
   // Sub-nav count: how many connectors exist. Polled so the badge stays live.
   const [connCount, setConnCount] = useState<number | null>(null);
@@ -31,9 +33,10 @@ export function IntegrationsView() {
         <div className="px-2 text-[13px] font-semibold mb-3 flex items-center gap-2">
           <Icon name="plug" size={16} /> {tt("integrations.nav_title")}
         </div>
-        <button className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] flex items-center justify-between bg-paper text-accent font-medium">
+        <button onClick={() => setView("catalog")} className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] text-accent font-medium">Tool Catalog</button>
+        <button onClick={() => setView("admin")} className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] flex items-center justify-between bg-paper text-accent font-medium">
           <span className="flex items-center gap-2 min-w-0">
-            <Icon name="plug" size={15} /> {tt("integrations.tab_connectors")}
+            <Icon name="plug" size={15} /> Administration
           </span>
           {connCount != null && (
             <span className="text-[11px] shrink-0 text-accent">{connCount}</span>
@@ -43,13 +46,14 @@ export function IntegrationsView() {
 
       <div className="flex-1 min-w-0 overflow-y-auto hairline-scroll">
         <div className="max-w-4xl mx-auto px-7 py-6">
-          <section>
+          {view === "catalog" ? <VisionCatalog onAdministration={() => setView("admin")} /> : <section>
+            <div className="vision-notice"><strong>Developer / administrator preview</strong><p>This inherited connection manager permits custom servers. Role restrictions and catalog enforcement are not implemented. This local pitch build is operated by its owner.</p></div>
             <PanelHead
               title={tt("integrations.connectors_title")}
               sub={tt("integrations.connectors_sub")}
             />
             <ConnectorsSection />
-          </section>
+          </section>}
         </div>
       </div>
     </main>

@@ -1024,7 +1024,7 @@ export function Sidebar(props: Props) {
             <Icon name="sidebar" size={16} />
           </button>
         )}
-        <div className="brand-wordmark text-[14px]">OpenWorker<span className="beta-tag">BETA</span></div>
+        <div className="vision-brand" aria-label="Vision Beta by MACOM"><div>Vision <span className="vision-beta">BETA</span></div><span className="vision-by">by MACOM</span></div>
       </div>
 
       {/* New session: a quiet nav row like its siblings (UX-040 — the filled accent block
@@ -1066,6 +1066,11 @@ export function Sidebar(props: Props) {
         </button>
       </div>
 
+      <div className="px-2.5 mt-1">
+        <button className="vision-nav-link" onClick={props.onOpenIntegrations}><Icon name="plug" size={15} /> Tool Catalog</button>
+        <button className="vision-nav-link" onClick={props.onManage}><Icon name="gear" size={15} /> Settings &amp; identity</button>
+        <button className="vision-nav-link" onClick={props.onOpenAudit}><Icon name="book" size={15} /> Activity</button>
+      </div>
       {/* Scroll area: Pinned band + the RECENT header (with group/filter control), then the body —
           grouped (per-persona accordion) or flat (chronological list). */}
       {/* UX-040 rhythm: clear air between the fixed nav block and the content bands. */}

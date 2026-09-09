@@ -1597,7 +1597,7 @@ export function App() {
         {overlay && (
           <div className="titlebar-drag" data-tauri-drag-region>
             <span className="titlebar-brand brand-wordmark">
-              <Icon name="logo" size={13} className="mark" /> OpenWorker<span className="beta-tag">BETA</span>
+              <Icon name="logo" size={13} className="mark" /> Vision<span className="beta-tag">BETA · MACOM</span>
             </span>
           </div>
         )}

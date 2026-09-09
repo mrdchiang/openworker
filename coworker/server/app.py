@@ -185,6 +185,8 @@ def create_app(manager: SessionManager) -> FastAPI:
         await manager.aclose()  # stop gateway + close MCP connections on shutdown
 
     app = FastAPI(title="coworker", version="0.0.0", lifespan=lifespan)
+    from .vision import router as vision_router
+    app.include_router(vision_router)
     api_token = os.environ.get("COWORKER_API_TOKEN", "")
     tokenless_paths = {
         "/v1/health",

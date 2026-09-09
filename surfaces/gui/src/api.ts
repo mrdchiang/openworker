@@ -447,6 +447,20 @@ export async function removeRoot(
   return res.json();
 }
 
+// Vision prototype endpoints share the sidecar's authenticated fetch wrapper.
+export interface VisionRecord { id: string; source: string; title: string; body: string }
+export interface VisionIdentity {
+  issuer: string; client_id: string; redirect_uri: string; groups_claim: string;
+  employee_group: string; administrator_group: string; developer_group: string;
+}
+export async function visionRequest<T>(path: string, body?: unknown, method = "POST"): Promise<T> {
+  const res = await fetch(`${httpBase()}/v1/vision/${path}`, body === undefined ? undefined : {
+    method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Request failed (${res.status}). Check the configuration and try again.`);
+  return res.json();
+}
+
 // -- MCP servers --------------------------------------------------------------
 export interface McpServer {
   name: string;

@@ -65,12 +65,19 @@ export function SessionIntro({
 
   return (
     <div className="intro">
+      <div className="vision-welcome-tag">Vision Beta by MACOM · Internal pilot</div>
       <h1 className="greeting">
-        <span className="mark">✦</span> {t("intro.greeting")}
+        <span className="mark">✦</span> What will you move forward today?
       </h1>
-      <p className="intro-lede">{t("intro.lede")}</p>
+      <p className="intro-lede">Work with your files, choose your model, and bring your tools together. Enable the fictional Aurora demo in Tool Catalog to try the examples below.</p>
 
       <div className="intro-tasks">
+        <button className="task-card" onClick={() => onPrefill("Use the Vision demo MCP tools to prepare an Aurora readiness brief. Search the fictional Jira, Microsoft 365, GitHub, and inventory records. Identify the blocker, next review date, and source IDs. Label the result FICTIONAL DEMO DATA. If the demo tools are unavailable, ask me to enable them in Tool Catalog; do not invent records.")}>
+          <span className="task-card-body"><span className="task-card-title">Prepare an Aurora readiness brief</span><span className="task-card-sub">Fictional Jira issues, project documents, and lab records</span></span><span className="task-card-act">Draft prompt →</span>
+        </button>
+        <button className="task-card" onClick={() => onPrefill("Use the Vision demo MCP tools to retrieve DEMO-DS-A and DEMO-DS-B. Compare the fictional datasheet revisions, list the changed values, and cite the record IDs. Label the result FICTIONAL DEMO DATA, not actual MACOM specifications. If the demo tools are unavailable, ask me to enable them in Tool Catalog; do not invent records.")}>
+          <span className="task-card-body"><span className="task-card-title">Compare two datasheet revisions</span><span className="task-card-sub">Fictional engineering specifications with source references</span></span><span className="task-card-act">Draft prompt →</span>
+        </button>
         <button className="task-card" data-testid="intro-task-folder" onClick={pickFolder}>
           <span className="task-card-body">
             <span className="task-card-title">{t("intro.task_folder_title")}</span>

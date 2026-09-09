@@ -6,6 +6,7 @@ import { platformOS } from "./tauri";
 import { initI18n } from "./i18n";
 import "./tailwind.css";
 import "./styles.css";
+import "./vision.css";
 
 initTheme();
 // Platform hook for CSS (html[data-platform="windows"] scrollbar styling etc.).
