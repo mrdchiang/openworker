@@ -756,6 +756,7 @@ pub fn run() {
                 // Keep the Python sidecar on Vision's product-owned state root. This is
                 // deliberately explicit: the inherited default is named `coworker` and
                 // allowed the upstream updater to appear to wipe Vision customizations.
+                .env("COWORKER_VISION_MODE", "1")
                 .env("COWORKER_STATE_DIR", state_dir())
                 // The sidecar self-exits if we die abruptly (dev-watcher restart, crash) —
                 // belt-and-suspenders alongside the RunEvent::ExitRequested kill below.

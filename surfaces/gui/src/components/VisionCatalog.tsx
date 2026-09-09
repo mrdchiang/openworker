@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { getMcpTools, visionRequest, type VisionRecord } from "../api";
+import { getDemoIdentity, getMcpTools, visionRequest, type VisionRecord } from "../api";
 import { MacomLogo } from "./VisionBrand";
 
 const entries = [
-  { name: "Jira", mark: "J", category: "Work management", description: "Bring issue context, blockers, and project progress into your work.", capabilities: ["Search issues", "Read issue details", "Summarize project status"], setup: "An approved Jira connection and organization authorization. Drafting tickets does not submit them.", color: "#1868db" },
-  { name: "Microsoft 365", mark: "M", category: "Knowledge", description: "Find the documents and project context your team works with.", capabilities: ["Search SharePoint and OneDrive", "Retrieve documents", "Summarize source material"], setup: "An approved Microsoft tenant application and scoped document access. Outlook and Teams are future additions.", color: "#a33b16" },
-  { name: "Engineering knowledge", mark: "EK", category: "Engineering", description: "Compare datasheet revisions and retrieve engineering references.", capabilities: ["Search references", "Read datasheets", "Compare revisions with citations"], setup: "A reviewed document collection and an approved search service.", color: "#005a84" },
-  { name: "GitHub", mark: "GH", category: "Engineering", description: "Understand repository activity, pull requests, and engineering changes.", capabilities: ["Read repository content", "Inspect pull requests", "Summarize changes"], setup: "An approved GitHub connection with access restricted to selected repositories.", color: "#334155" },
-  { name: "Internal inventory", mark: "IN", category: "Operations", description: "Look up lab assets, ownership, and calibration records.", capabilities: ["Find assets", "Read calibration status", "Link assets to open issues"], setup: "An approved internal inventory endpoint and read permissions.", color: "#427444" },
+  { name: "Jira", requiredRole: "user", mark: "J", category: "Work management", description: "Bring issue context, blockers, and project progress into your work.", capabilities: ["Search issues", "Read issue details", "Summarize project status"], setup: "An approved Jira connection and organization authorization. Drafting tickets does not submit them.", color: "#1868db" },
+  { name: "Microsoft 365", requiredRole: "user", mark: "M", category: "Knowledge", description: "Find the documents and project context your team works with.", capabilities: ["Search SharePoint and OneDrive", "Retrieve documents", "Summarize source material"], setup: "An approved Microsoft tenant application and scoped document access. Outlook and Teams are future additions.", color: "#a33b16" },
+  { name: "Engineering knowledge", requiredRole: "user", mark: "EK", category: "Engineering", description: "Compare datasheet revisions and retrieve engineering references.", capabilities: ["Search references", "Read datasheets", "Compare revisions with citations"], setup: "A reviewed document collection and an approved search service.", color: "#005a84" },
+  { name: "GitHub", requiredRole: "developer", mark: "GH", category: "Engineering", description: "Understand repository activity, pull requests, and engineering changes.", capabilities: ["Read repository content", "Inspect pull requests", "Summarize changes"], setup: "An approved GitHub connection with access restricted to selected repositories.", color: "#334155" },
+  { name: "Internal inventory", requiredRole: "developer", mark: "IN", category: "Operations", description: "Look up lab assets, ownership, and calibration records.", capabilities: ["Find assets", "Read calibration status", "Link assets to open issues"], setup: "An approved internal inventory endpoint and read permissions.", color: "#427444" },
+  { name: "CrowdStrike", requiredRole: "security", mark: "CS", category: "Security", description: "Review endpoint posture and security detections for triage.", capabilities: ["Read detections", "Inspect device posture", "Summarize incidents"], setup: "Security role, approved tenant scope, and explicit approval for response actions.", color: "#e11d48" },
+  { name: "TeamViewer", requiredRole: "security", mark: "TV", category: "Security", description: "Review remote support sessions and device access posture.", capabilities: ["Read session history", "Check device authorization", "Prepare support context"], setup: "Security role and approved device groups. Remote control actions remain approval-gated.", color: "#0b63ce" },
 ];
 type Demo = { installed: boolean; notice: string; records: VisionRecord[] };
 
@@ -20,8 +22,9 @@ export function VisionCatalog({ onAdministration }: { onAdministration: () => vo
   const [error, setError] = useState("");
   const [tested, setTested] = useState(false);
   const [message, setMessage] = useState("");
+  const [role, setRole] = useState("user");
   const load = async () => { setError(""); try { setDemo(await visionRequest<Demo>("demo")); } catch(e) { setError((e as Error).message); } };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(); getDemoIdentity().then(i => setRole(i.role)).catch(() => {}); }, []);
   const current = entries.find(e => e.name === selected);
   const filtered = entries.filter(e => (category === "All tools" || category === e.category) && `${e.name} ${e.description} ${e.capabilities.join(" ")}`.toLowerCase().includes(query.toLowerCase()));
   return <section className="vision-catalog">
@@ -36,11 +39,11 @@ export function VisionCatalog({ onAdministration }: { onAdministration: () => vo
       <button className="vision-secondary" onClick={onAdministration}>Connection administration</button></div>
     <div className="vision-notice subtle"><strong>Pilot catalog preview</strong><p>These are proposed MACOM integrations, not an assertion of company approval. Live systems are not connected by this catalog. Administrator roles and catalog restrictions are not yet enforced.</p></div>
     <div className="vision-search"><input aria-label="Search tool catalog" placeholder="Search tools or capabilities…" value={query} onChange={e => setQuery(e.target.value)} />
-      <select aria-label="Filter catalog category" value={category} onChange={e => setCategory(e.target.value)}>{["All tools", "Work management", "Knowledge", "Engineering", "Operations"].map(c => <option key={c}>{c}</option>)}</select></div>
-    <div className="vision-catalog-grid">{filtered.map(e => <button key={e.name} className={"vision-tool-card" + (selected === e.name ? " selected" : "")} onClick={() => setSelected(e.name)} aria-pressed={selected === e.name}>
-      <div className="vision-card-top"><span className="vision-tool-mark" style={{ background: e.color }}>{e.mark}</span><span className="vision-status">Setup required</span></div>
+      <select aria-label="Filter catalog category" value={category} onChange={e => setCategory(e.target.value)}>{["All tools", "Work management", "Knowledge", "Engineering", "Operations", "Security"].map(c => <option key={c}>{c}</option>)}</select></div>
+    <div className="vision-catalog-grid">{filtered.map(e => { const allowed = role === "administrator" || role === e.requiredRole || (role === "developer" && e.requiredRole === "user"); return <button key={e.name} className={"vision-tool-card" + (selected === e.name ? " selected" : "") + (!allowed ? " opacity-60" : "")} onClick={() => allowed && setSelected(e.name)} aria-pressed={selected === e.name}>
+      <div className="vision-card-top"><span className="vision-tool-mark" style={{ background: e.color }}>{e.mark}</span><span className="vision-status">{allowed ? "Setup required" : `Requires ${e.requiredRole} role`}</span></div>
       <h3>{e.name}</h3><p>{e.description}</p><div className="vision-card-footer"><span>{e.category}</span><span>View capabilities →</span></div>
-    </button>)}</div>
+    </button>; })}</div>
     {filtered.length === 0 && <p role="status" className="vision-empty">No tools match your search. Try a different name or category.</p>}
     {current && <section className="vision-tool-detail" aria-label={`${current.name} capabilities`}>
       <div className="vision-catalog-toolbar"><h2>{current.name}</h2><button className="vision-secondary" onClick={() => setSelected(null)}>Close details</button></div>

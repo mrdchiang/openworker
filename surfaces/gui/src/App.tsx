@@ -1760,7 +1760,7 @@ export function App() {
           initialOpenId={scheduledOpenId}
         />
       ) : surface === "integrations" ? (
-        <IntegrationsView />
+        <IntegrationsView onOpenAudit={() => setSurface("audit")} />
       ) : surface === "settings" ? (
         <SettingsView
           key={settingsTab}

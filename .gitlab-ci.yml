@@ -1,0 +1,42 @@
+stages:
+  - test
+  - security
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+variables:
+  SECRET_DETECTION_HISTORIC_SCAN: "true"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+python-tests:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -e ".[dev]"
+    - pytest -q
+
+frontend-tests:
+  stage: test
+  image: node:22-bookworm-slim
+  script:
+    - cd surfaces/gui
+    - npm ci
+    - npm run build
+    - npm run test -- --run
+
+# Keep the installer supply-chain check explicit. The MSI is a release artifact
+# and must not be treated as a trusted update until it is code-signed.
+installer-policy:
+  stage: security
+  image: alpine:3.20
+  script:
+    - test -f surfaces/gui/src-tauri/tauri.conf.json
+    - grep -q '"updater"' surfaces/gui/src-tauri/tauri.conf.json
+    - echo "Installer signing and updater-manifest verification are required before production release."
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'

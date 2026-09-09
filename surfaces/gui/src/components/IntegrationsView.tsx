@@ -4,6 +4,7 @@ import { getConnectors } from "../api";
 import { ConnectorsSection } from "./connectors/ConnectorsSection";
 import { Icon } from "./Icon";
 import { VisionCatalog } from "./VisionCatalog";
+import { SecurityCenter } from "./SecurityCenter";
 
 // The Connectors surface (renamed from "Integrations", §26). The separate "MCP
 // servers" tab is retired (UX-034): custom MCP servers now live on the Connectors
@@ -12,8 +13,8 @@ import { VisionCatalog } from "./VisionCatalog";
 // ⚠ unrouted badge) moved whole to Inbox ▸ Configure (§28); the one remaining
 // Activity is the audit log, reached from the account menu.
 
-export function IntegrationsView() {
-  const [view, setView] = useState<"catalog" | "admin">("catalog");
+export function IntegrationsView({ onOpenAudit }: { onOpenAudit?: () => void } = {}) {
+  const [view, setView] = useState<"catalog" | "admin" | "security">("catalog");
   const { t: tt } = useTranslation();
   // Sub-nav count: how many connectors exist. Polled so the badge stays live.
   const [connCount, setConnCount] = useState<number | null>(null);
@@ -42,11 +43,12 @@ export function IntegrationsView() {
             <span className="text-[11px] shrink-0 text-accent">{connCount}</span>
           )}
         </button>
+        <button onClick={() => setView("security")} className="w-full text-left px-2.5 py-2 rounded-lg text-[13px] text-muted hover:text-ink flex items-center gap-2"><Icon name="shield" size={15} /> Security Center</button>
       </nav>
 
       <div className="flex-1 min-w-0 overflow-y-auto hairline-scroll">
         <div className="max-w-4xl mx-auto px-7 py-6">
-          {view === "catalog" ? <VisionCatalog onAdministration={() => setView("admin")} /> : <section>
+          {view === "catalog" ? <VisionCatalog onAdministration={() => setView("admin")} /> : view === "security" ? <SecurityCenter onOpenAudit={() => onOpenAudit?.()} /> : <section>
             <div className="vision-notice"><strong>Developer / administrator preview</strong><p>This inherited connection manager permits custom servers. Role restrictions and catalog enforcement are not implemented. This local pitch build is operated by its owner.</p></div>
             <PanelHead
               title={tt("integrations.connectors_title")}

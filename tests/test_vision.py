@@ -51,6 +51,23 @@ def test_demo_install_is_fixed_and_idempotent(client):
     assert len(client.get("/v1/vision/demo").json()["records"]) == 7
 
 
+def test_demo_roles_and_admin_policy_boundary(client):
+    assert client.get("/v1/vision/policy").json()["role"] == "user"
+    assert client.put("/v1/vision/policy", json={}).status_code == 403
+    for email, role in (("priya.shah@macom-demo.local", "developer"), ("morgan.lee@macom-demo.local", "administrator")):
+        selected = client.put("/v1/vision/demo-identity", json={"email": email})
+        assert selected.status_code == 200
+        assert selected.json()["role"] == role
+        assert client.get("/v1/vision/policy").json()["role"] == role
+    allowed = client.put("/v1/vision/policy", json={})
+    assert allowed.status_code == 200
+    assert allowed.json()["custom_servers_allowed"] is False
+
+
+def test_demo_identity_rejects_unknown_user(client):
+    assert client.put("/v1/vision/demo-identity", json={"email": "attacker@example.com"}).status_code == 422
+
+
 def test_demo_sources_and_unknown_record():
     result = search_demo_records("Aurora", "Jira")
     assert {r["id"] for r in result["records"]} == {"DEMO-101", "DEMO-102"}

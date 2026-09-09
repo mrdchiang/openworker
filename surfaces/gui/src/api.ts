@@ -878,6 +878,12 @@ export async function getAudit(params: {
   return (await res.json()).events ?? [];
 }
 
+export type DemoIdentity = { email: string; role: string; demo_only: boolean };
+export async function getDemoIdentity(): Promise<DemoIdentity> { return fetch(`${httpBase()}/v1/vision/demo-identity`).then(r => r.json()); }
+export async function setDemoIdentity(email: string): Promise<DemoIdentity> { return fetch(`${httpBase()}/v1/vision/demo-identity`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }).then(r => r.json()); }
+export async function getVisionPolicy(): Promise<{ role: string; curated_servers: string[]; custom_servers_allowed: boolean }> { return fetch(`${httpBase()}/v1/vision/policy`).then(r => r.json()); }
+export async function updateVisionPolicy(): Promise<{ ok?: boolean; detail?: string; role?: string }> { const r = await fetch(`${httpBase()}/v1/vision/policy`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: "{}" }); const body = await r.json(); if (!r.ok) throw new Error(body.detail || "Policy update denied"); return body; }
+
 export interface BrowserState {
   open: boolean;
   url: string;

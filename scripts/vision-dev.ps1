@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $visionRoot = Split-Path $PSScriptRoot -Parent
 $env:COWORKER_STATE_DIR = Join-Path $env:LOCALAPPDATA 'MACOM/VisionBeta/dev-state'
+$env:COWORKER_VISION_MODE = '1'
 $visionWorkspace = Join-Path $env:LOCALAPPDATA 'MACOM/VisionBeta/demo-workspace'
 New-Item -ItemType Directory -Force -Path $env:COWORKER_STATE_DIR, $visionWorkspace | Out-Null
 

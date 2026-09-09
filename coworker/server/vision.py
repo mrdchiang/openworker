@@ -13,6 +13,21 @@ from ..vision_demo import NOTICE, RECORDS
 
 router = APIRouter(prefix="/v1/vision")
 DEMO_SERVER = "vision-demo"
+DEMO_IDENTITIES = {
+    "alex.chen@macom-demo.local": "user",
+    "priya.shah@macom-demo.local": "developer",
+    "morgan.lee@macom-demo.local": "administrator",
+    "sam.rivera@macom-demo.local": "security",
+}
+
+def _demo_role() -> str:
+    path = state_dir() / "vision-demo-identity.json"
+    email = path.read_text(encoding="utf-8").strip() if path.exists() else "alex.chen@macom-demo.local"
+    return DEMO_IDENTITIES.get(email, "user")
+
+def _require_demo_admin() -> None:
+    if _demo_role() != "administrator":
+        raise HTTPException(403, "Administrator demo identity required")
 
 
 class IdentityConfig(BaseModel):
@@ -60,6 +75,39 @@ def get_identity():
 def save_identity(config: IdentityConfig):
     write_private_text(state_dir() / "vision-identity.json", json.dumps(config.model_dump(), indent=2))
     return {"config": config.model_dump(), "authentication_active": False}
+
+@router.get("/demo-identity")
+def get_demo_identity():
+    path = state_dir() / "vision-demo-identity.json"
+    email = path.read_text(encoding="utf-8").strip() if path.exists() else "alex.chen@macom-demo.local"
+    if email not in DEMO_IDENTITIES:
+        email = "alex.chen@macom-demo.local"
+    return {"email": email, "role": DEMO_IDENTITIES[email], "demo_only": True}
+
+class DemoIdentity(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def known_identity(cls, value: str) -> str:
+        if value not in DEMO_IDENTITIES:
+            raise ValueError("Unknown demo identity")
+        return value
+
+@router.put("/demo-identity")
+def set_demo_identity(identity: DemoIdentity):
+    write_private_text(state_dir() / "vision-demo-identity.json", identity.email)
+    return {"email": identity.email, "role": DEMO_IDENTITIES[identity.email], "demo_only": True}
+
+@router.get("/policy")
+def get_policy():
+    return {"role": _demo_role(), "curated_servers": [DEMO_SERVER], "custom_servers_allowed": _demo_role() == "administrator"}
+
+@router.put("/policy")
+def update_policy(body: dict):
+    _require_demo_admin()
+    return {"ok": True, "role": _demo_role(), "curated_servers": [DEMO_SERVER], "custom_servers_allowed": False}
 
 
 @router.get("/demo")

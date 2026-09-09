@@ -8,6 +8,7 @@ sessions span folders.
 from __future__ import annotations
 
 import asyncio
+import os
 import json
 import logging
 import os
@@ -1240,6 +1241,8 @@ class SessionManager:
             secrets=self.secrets,
             workspace_trusted=self._mcp_workspace_trusted(ws),
         ):
+            if os.getenv("COWORKER_VISION_MODE") == "1" and server.name != "vision-demo":
+                continue
             if not server.enabled:
                 continue
             if server.auth == "oauth" and not mcp_oauth.has_tokens(
@@ -1374,6 +1377,8 @@ class SessionManager:
 
         out = []
         for name, raw in read_global().items():
+            if os.getenv("COWORKER_VISION_MODE") == "1" and name != "vision-demo":
+                continue
             d = get_descriptor(name)
             if d is not None and d.mcp_url:
                 # Connector-backed server: surfaced on the Connectors page (its
