@@ -35,6 +35,9 @@ export function UpdateBanner() {
   const { t } = useTranslation();
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
   const [phase, setPhase] = useState<Phase>("downloading");
+  // Vision releases are distributed deliberately; the inherited OpenWorker updater must
+  // remain disabled until a MACOM-owned signed update manifest exists.
+  if (import.meta.env.VITE_VISION_DISABLE_UPDATES !== "0") return null;
   // Per-run, per-version dismissal — no localStorage, so a restart re-offers, and a
   // NEWER release found by a later check overrides an earlier "Later".
   const dismissed = useRef<string | null>(null);

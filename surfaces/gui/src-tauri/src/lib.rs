@@ -210,8 +210,8 @@ fn server_bin() -> PathBuf {
     p
 }
 
-/// Mirror of `coworker.secrets.state_dir()` so the shell and server agree on `desktop.json`.
-/// Windows: `%APPDATA%\coworker`; POSIX: `~/.config/coworker`. `COWORKER_STATE_DIR` overrides.
+/// Vision-owned state root. Keep this product isolated from upstream OpenWorker so an
+/// upstream release can never replace Vision's settings or credentials.
 fn state_dir() -> PathBuf {
     if let Ok(d) = std::env::var("COWORKER_STATE_DIR") {
         return PathBuf::from(d);
@@ -219,11 +219,11 @@ fn state_dir() -> PathBuf {
     #[cfg(windows)]
     {
         if let Ok(appdata) = std::env::var("APPDATA") {
-            return PathBuf::from(appdata).join("coworker");
+            return PathBuf::from(appdata).join("MACOM").join("VisionBeta");
         }
     }
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-    PathBuf::from(home).join(".config").join("coworker")
+    PathBuf::from(home).join(".config").join("macom").join("vision-beta")
 }
 
 fn desktop_prefs_path() -> PathBuf {
@@ -753,6 +753,10 @@ pub fn run() {
                 // KUBECONFIG, …) — see sidecar_env(). Applied FIRST so the explicit COWORKER_*
                 // vars below always win over anything a profile happens to export.
                 .envs(sidecar_env())
+                // Keep the Python sidecar on Vision's product-owned state root. This is
+                // deliberately explicit: the inherited default is named `coworker` and
+                // allowed the upstream updater to appear to wipe Vision customizations.
+                .env("COWORKER_STATE_DIR", state_dir())
                 // The sidecar self-exits if we die abruptly (dev-watcher restart, crash) —
                 // belt-and-suspenders alongside the RunEvent::ExitRequested kill below.
                 // The explicit PID matters: under PyInstaller onefile the python process is a

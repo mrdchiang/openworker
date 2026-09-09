@@ -49,3 +49,7 @@ Live smoke test passed: browser UI connected to the isolated backend, selected `
 Verification: production build, 181 inherited frontend unit tests plus 2 new catalog tests, 10 new backend tests (including real MCP stdio execution, rejected identity fields, and sidecar token enforcement). Identity settings were saved through the browser; the catalog's real connection test discovered both tools.
 
 Not yet delivered: live enterprise connections or enforced employee/admin roles. The Windows packaging recipe is now branded for Vision Beta by MACOM; producing the MSI requires a clean PyInstaller sidecar build and a full Tauri build, which is the next step.
+
+## Update safety
+
+The inherited upstream updater was disabled for Vision. It previously pointed at OpenWorker's public release manifests, which could replace a Vision binary with an upstream build. The desktop shell and sidecar now use the product-owned `MACOM/VisionBeta` state root and explicitly pass it to the server. Future updates should be enabled only with a MACOM-owned signed manifest and migration tests.
